@@ -23,3 +23,13 @@
               line="OPENSTACK_HOST = '{{ keystone_hostname }}'"
   notify:
     - Restart apache2
+
+- name: Disable default apache config
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+  notify:
+    - Restart apache2
+
+- name: Enable openstack horizon apache config
+  file: path=/etc/apache2/sites-enabled/openstack-dashboard.conf state=link src=/etc/apache2/sites-available/openstack-dashboard.conf
+  notify:
+    - Restart apache2
