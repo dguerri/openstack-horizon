@@ -17,9 +17,46 @@
 # limitations under the License.
 #
 
-- name: Configure horizon
+- name: Configure keystone in horizon
   lineinfile: dest=/etc/openstack-dashboard/local_settings.py
               regexp=^OPENSTACK_HOST
               line="OPENSTACK_HOST = '{{ keystone_hostname }}'"
+  notify:
+    - Restart apache2
+
+- name: Configure secret key location
+  lineinfile: dest=/etc/openstack-dashboard/local_settings.py
+              regexp=^SECRET_KEY
+              line="SECRET_KEY = secret_key.generate_or_read_from_file('/var/lib/openstack-dashboard/secret_key/key')"
+  notify:
+    - Restart apache2
+
+- name: Setup horizon var dir
+  file: dest=/var/lib/openstack-dashboard owner=horizon group=horizon mode=755 state=directory
+  notify:
+    - Restart apache2
+
+- name: Setup horizon secret key dir
+  file: dest=/var/lib/openstack-dashboard/secret_key owner=www-data group=www-data mode=755 state=directory
+  notify:
+    - Restart apache2
+
+- name: Disable default apache config
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+  notify:
+    - Restart apache2
+
+- name: Disable the default config in Ubuntu
+  file: path=/etc/apache2/conf-enabled/openstack-dashboard.conf state=absent
+  notify:
+    - Restart apache2
+
+- name: Write default openstack horizon apache config
+  copy: dest=/etc/apache2/sites-available/openstack-dashboard.conf src=openstack-dashboard.conf mode=644 owner=root group=root
+  notify:
+    - Restart apache2
+
+- name: Enable openstack horizon apache config
+  file: path=/etc/apache2/sites-enabled/openstack-dashboard.conf state=link src=/etc/apache2/sites-available/openstack-dashboard.conf
   notify:
     - Restart apache2
