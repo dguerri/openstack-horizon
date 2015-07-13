@@ -17,9 +17,15 @@
 # limitations under the License.
 #
 
-- name: Configure Horizon
-  lineinfile: dest={{ horizon_local_config }}
-              regexp=^OPENSTACK_HOST
-              line="OPENSTACK_HOST = '{{ keystone_hostname }}'"
-  notify:
-    - Restart Apache2
+- name: Install Horizon application and dependencies
+  apt: name="{{ item }}" state=present
+  with_items:
+    - apache2
+    - memcached
+    - libapache2-mod-wsgi
+    - openstack-dashboard
+
+- name: Remove Ubuntu theme
+  apt: name="{{ item }}" state=absent purge=yes
+  with_items:
+    - openstack-dashboard-ubuntu-theme

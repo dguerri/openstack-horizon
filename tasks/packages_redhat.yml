@@ -17,9 +17,16 @@
 # limitations under the License.
 #
 
-- name: Configure Horizon
-  lineinfile: dest={{ horizon_local_config }}
-              regexp=^OPENSTACK_HOST
-              line="OPENSTACK_HOST = '{{ keystone_hostname }}'"
-  notify:
-    - Restart Apache2
+- name: Set name of webserver
+  set_fact:
+    horizon_webserver_service: httpd
+    horizon_local_config:      /etc/openstack-dashboard/local_settings
+
+- name: Install Horizon application and dependencies
+  yum: name="{{ item }}" state=latest
+  with_items:
+    - openstack-dashboard
+    - httpd
+    - mod_wsgi
+    - memcached
+    - python-memcached
