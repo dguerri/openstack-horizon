@@ -24,5 +24,8 @@
 
 - meta: flush_handlers
 
-- name: Make sure Apache is started
-  service: name=apache2 state=started
+- name: Make sure Apache and Memcached are started
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - '{{ horizon_webserver_service }}'
+    - memcached

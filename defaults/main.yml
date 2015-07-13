@@ -17,4 +17,6 @@
 # limitations under the License.
 #
 
-keystone_hostname: localhost
+keystone_hostname:          localhost
+horizon_webserver_service:  apache2
+horizon_local_config:       /etc/openstack-dashboard/local_settings.py
